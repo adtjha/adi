@@ -1,0 +1,13 @@
+doctype html
+html(lang='en')
+  head
+    title #{title}
+    block links
+    block scripts
+    meta(http-equiv='Content-Security-Policy', content="default-src 'self'")
+    link(rel="stylesheet" href="/api/admin/style.css")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    block style
+  body
+    block body
+    block footer

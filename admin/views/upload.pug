@@ -1,0 +1,9 @@
+extends layout.pug
+
+block body
+  .container
+    h1 Text ? Media - File Upload.
+  form#uploadForm.input(ref='uploadForm', action='http://localhost:6969/admin/create/upload', method='post', enctype='multipart/form-data')
+    input.input(type='file', name='File',onchange='invoke(this)')
+    input.input(type='submit', value='Upload')
+  script(src='/api/admin/upload.js')

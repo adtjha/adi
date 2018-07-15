@@ -1,0 +1,11 @@
+extends layout.pug
+block scripts
+  script(src="/api/admin/app.js")
+
+block body
+  .container
+    h1 #{selected}
+    ol
+      each page in pages
+        li
+          a(href= page.url) #{page.name}
