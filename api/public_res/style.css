@@ -220,13 +220,13 @@ nav, section {
   -webkit-margin-after: 8px;
   margin-bottom: 8px;
   margin-top: 25px;
-  -webkit-transition: all 300ms ease-in-out;
-       -o-transition: all 300ms ease-in-out;
-          transition: all 300ms ease-in-out;
+  -webkit-transition: all 150ms ease-in-out;
+       -o-transition: all 150ms ease-in-out;
+          transition: all 150ms ease-in-out;
 }
 .post:hover {
-  border: 3px solid #515151;
-  padding: 1% 3%;
+  outline: 3px solid #515151;
+  border-radius: 0;
 }
 
 .post > h1 {

@@ -126,10 +126,19 @@ admin.post('/create/upload', function(req, res) {
 
   let file = req.files.File;
   let add = address('F:/calc/adi/assests/', file.name, file.mimetype);
-  // Use the mv() method to place the file somewhere on your server
+
+  let assest = {};
+  assest.name = file.name;
+  assest.type = file.mimetype;
+  assest.address = add;
+
+  // Using the mv() method to place the file somewhere on your server
   file.mv(add, function(err) {
     if (err)
       return res.status(500).send(err);
+    else {
+      // console.log(assest);
+    }
     res.redirect('/admin/create/upload');
   });
 })
