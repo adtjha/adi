@@ -70,9 +70,9 @@ main {
   position: fixed;
   height: 100%;
   overflow: scroll;
-  background: #d4d4d4;
+  background: #f7f7f7;
   color: #515151;
-  background: linear-gradient(135deg, #03a9f4 25%, #cddc39 75%);
+  /* background: linear-gradient(135deg, #03a9f4 25%, #cddc39 75%); */
   background-position: 50% 50%;
   background-size: cover;
   background-repeat: repeat;
@@ -86,11 +86,12 @@ main {
 }
 
 .name {
-  margin-top: 2rem;
+  padding-top: 2rem;
   -webkit-box-orient: horizontal;
   -webkit-box-direction: normal;
   -ms-flex-direction: row;
       flex-direction: row;
+  background-color: rgba(30, 30, 30, .95);
   border-bottom: 1px solid white;
   padding-bottom: 2rem;
 }

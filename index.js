@@ -242,3 +242,8 @@ app.use('/posts', posts);
 posts.get('/', function(req, res) {
   res.send('<h1>Hell Yeah !</h1>')
 })
+
+posts.get('/:id', function(req, res) {
+  var digit = req.params;
+  res.send('<h1>Hell Yeah' + id + ' !</h1>')
+});
