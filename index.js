@@ -247,3 +247,43 @@ posts.get('/:id', function(req, res) {
   var digit = req.params;
   res.send('<h1>Hell Yeah' + id + ' !</h1>')
 });
+
+
+fs.readdir('./posts/', check);
+
+function check(err, files) {
+  // TODO: check for any file uploaded, if yes edit the registry and vice versa.
+  // console.log(files);
+  var post = {};
+  var json = {};
+  for (var i = 0; i < files.length; i++) {
+    date = extract(files[i], 'date');
+    time = extract(files[i], 'time');
+    name = extract(files[i], 'name');
+    summary = extract(files[i], 'summary');
+    post[date] = {
+      [time]: {
+        name,
+        summary
+      }
+    };
+  }
+  console.log(post);
+}
+
+function extract(string, type) {
+  switch (type) {
+    case 'date':
+      return string.split('~')[0].split('_').join('/');
+      break;
+    case 'time':
+      return string.split('~')[1].split('_').join(':');
+      break;
+    case 'name':
+      return string.split('~')[2].split('_').join(' ').split('.md').join('.');
+      break;
+    case 'summary':
+      return 0; // TODO: return summary.
+      break;
+  }
+}
