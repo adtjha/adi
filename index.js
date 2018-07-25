@@ -2,6 +2,8 @@ const express = require('express');
 var bodyParser = require("body-parser");
 const fileUpload = require('express-fileupload');
 const fs = require('fs');
+var showdown = require('showdown'),
+  converter = new showdown.Converter();
 
 const app = express();
 
@@ -178,6 +180,12 @@ api.get('/public/style.css', function(req, res) {
   });
 })
 
+api.get('/public/md.css', function(req, res) {
+  res.sendFile('md.css', {
+    root: 'api/public_res'
+  });
+})
+
 api.get('/public/app.js', function(req, res) {
   res.sendFile('app.js', {
     root: 'api/admin_res'
@@ -244,8 +252,15 @@ posts.get('/', function(req, res) {
 })
 
 posts.get('/:id', function(req, res) {
-  var digit = req.params;
-  res.send('<h1>Hell Yeah' + id + ' !</h1>')
+  var id = req.params.id;
+  fs.readdir('./posts/', (err, files) => {
+    var path = './posts/' + files[id];
+    fs.readFile(path, 'utf8', (err, data) => {
+      if (err) throw err;
+      // console.log(data);
+      res.send(insertHTML(converter.makeHtml(data)));
+    });
+  });
 });
 
 
@@ -255,7 +270,6 @@ function check(err, files) {
   // TODO: check for any file uploaded, if yes edit the registry and vice versa.
   // console.log(files);
   var post = {};
-  var json = {};
   for (var i = 0; i < files.length; i++) {
     date = extract(files[i], 'date');
     time = extract(files[i], 'time');
@@ -283,7 +297,116 @@ function extract(string, type) {
       return string.split('~')[2].split('_').join(' ').split('.md').join('.');
       break;
     case 'summary':
-      return 0; // TODO: return summary.
+      // return (string) => {
+      //
+      // };
       break;
   }
+}
+
+function insertHTML(html) {
+  return `<!DOCTYPE html>
+  <html>
+    <head>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <link href="https://fonts.googleapis.com/css?family=Courgette|Raleway:300" rel="stylesheet">
+      <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+      <script src="/api/public/app.js"></script>
+      <link rel="stylesheet" href="https://raw.githubusercontent.com/daneden/animate.css/master/animate.css">
+      <link rel="stylesheet" href="/api/public/style.css">
+      <link rel="stylesheet" href="/api/public/md.css">
+      <style media="screen">
+        @media screen and (max-width: 900px) {
+          .nav > li > a {
+            font-size: 36px;
+          }
+          main {
+            position: fixed;
+            z-index: -1;
+            width: 100%;
+          }
+          header {
+            width: 100%;
+            z-index: 0;
+          }
+          .name {
+            flex-direction: column;
+            margin-top: 2rem;
+          }
+          .name > h1 {
+            font-size: 4rem;
+            margin: auto;
+          }
+          .name > img {
+            height: 10rem;
+            width: 10rem;
+            margin-bottom: 2rem;
+          }
+          #intro > p {
+            font-size: 28px;
+          }
+          .menu > i {
+            color: white;
+            opacity: 1;
+          }
+          .close {
+            color: white !important;
+          }
+          .menu {
+            border: 3px solid white;
+            display: flex;
+            flex-direction: column;
+            width: 48px;
+            height: 48px;
+            position: fixed;
+            z-index: 1;
+            opacity: 1 !important;
+            background: linear-gradient(135deg, rgba(81, 81, 81, 1) 40%, rgba(130, 130, 130, 1) 125%);
+            bottom: 2rem;
+            border-radius: 50%;
+            right: 2rem;
+            box-shadow: 0 2px 4px 0 rgba(0,0,0,0.16),0 2px 10px 0 rgba(0,0,0,0.12)!important;
+          }
+        }
+      </style>
+    </head>
+    <body>
+    <div class="menu">
+      <i
+        class="material-icons hide"
+        onclick="js:this.classList.toggle('hide');document.querySelector('.menu').children
+      [1].classList.toggle('hide');document.querySelector('header').classList.toggle('hide');document.querySelector('main').classList.toggle('show');">menu</i>
+      <i
+        class="close material-icons"
+        onclick="js:this.classList.toggle('hide');document.querySelector('.menu').children
+      [0].classList.toggle('hide');document.querySelector('header').classList.toggle('hide');document.querySelector('main').classList.toggle('show');">close</i>
+    </div>
+    <header>
+      <nav>
+        <div class="name">
+          <img src="/api/public/face.jpg" alt="Image Not Supported.">
+          <h1 onclick="js:document.location.href = 'file:///F:/calc/game/different.html';">Aditya Jha.</h1>
+        </div>
+        <ul class="nav">
+          <li>
+            <a href="#intro">about</a>
+          </li>
+          <li>
+            <a href="/projects">projects</a>
+          </li>
+          <li>
+            <a href="/contact">contact</a>
+          </li>
+        </ul>
+        <div id="intro" name="intro">
+          <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.
+            It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with
+            desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</p>
+        </div>
+      </nav>
+    </header>
+        <div style="margin: 0% 0%;width: 70%;padding: 1%;">` + html + `
+        </div>
+      </body>
+    </html>`;
 }
