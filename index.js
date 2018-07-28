@@ -129,7 +129,8 @@ admin.post('/create/upload', function(req, res) {
     return res.status(400).send('No files were uploaded.');
 
   let file = req.files.File;
-  let add = address('F:/calc/adi/assests/', file.name, file.mimetype);
+  console.log(file);
+  let add = address('F:/github/adi/assests/', file.name, file.mimetype);
 
   let assest = {};
   assest.name = file.name;
@@ -142,6 +143,9 @@ admin.post('/create/upload', function(req, res) {
       return res.status(500).send(err);
     else {
       // console.log(assest);
+      setTimeout(() => {
+        fs.readdir('./assests/', update);
+      }, '2000')
     }
     res.redirect('/admin/create/upload');
   });
@@ -234,33 +238,35 @@ function address(address, name, mimetype) {
 
 
 // Asset Manager
+
 var assests = {};
 fs.readdir('./assests/', update);
+var asset = {};
 
 function update(err, folders) {
-  console.log(folders);
   for (var j = 0; j < folders.length; j++) {
-    files = folders[j];
     path = './assests/' + folders[j];
-    fs.readdir(path, open);
+    asset[folders[j]] = [];
+    var files = fs.readdirSync(path);
+    for (var i = 0; i < files.length; i++) {
+      var file = {};
+      console.log("current..." + files[i]);
+      path = path + "/" + files[i];
+      file["size"] = fs.statSync(path).size;
+      file["name"] = files[i].split(files[i].split('.')[files[i].split('.').length - 1])[0];
+      file["type/extension"] = files[i].split('.')[files[i].split('.').length - 1];
+      asset[folders[j]].push(file);
+      path = path.split('/' + files[i])[0];
+    }
   }
+  fs.writeFile('./registry/assests.json', JSON.stringify(asset), (err) => {
+    if (err) console.error(err);
+    console.log("Assets file Updated.");
+  });
 }
-
-function open(err, files) {
-  var file = {};
-  for (var i = 0; i < files.length; i++) {
-    // files[i]
-    path = "./assests/" + folders[j] + "/" + files[i];
-    file["size"] = fs.statSync(path).size;
-    file["name"] = file.split(file.split('.')[file.split('.').length - 1])[0];
-    file["type/extension"] = file.split('.')[file.split('.').length - 1];
-    console.log(file);
-  }
-  return file;
-}
-
 
 // Posts Area
+
 var post = {};
 var posts = express();
 posts.use(bodyParser.urlencoded({
@@ -308,6 +314,7 @@ async function check(err, files) {
   }
   fs.writeFile('./registry/posts.json', JSON.stringify(post), (err) => {
     if (err) console.error(err);
+    console.log("Posts JSON File updated.");
   });
 }
 
