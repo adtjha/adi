@@ -4,6 +4,8 @@ const fileUpload = require('express-fileupload');
 const fs = require('fs');
 var showdown = require('showdown'),
   converter = new showdown.Converter();
+const cheerio = require('cheerio');
+
 
 const app = express();
 
@@ -232,15 +234,34 @@ function address(address, name, mimetype) {
 
 
 // Asset Manager
+var assests = {};
 fs.readdir('./assests/', update);
 
-function update(err, files) {
-  // console.log(files);
+function update(err, folders) {
+  console.log(folders);
+  for (var j = 0; j < folders.length; j++) {
+    files = folders[j];
+    path = './assests/' + folders[j];
+    fs.readdir(path, open);
+  }
+}
+
+function open(err, files) {
+  var file = {};
+  for (var i = 0; i < files.length; i++) {
+    // files[i]
+    path = "./assests/" + folders[j] + "/" + files[i];
+    file["size"] = fs.statSync(path).size;
+    file["name"] = file.split(file.split('.')[file.split('.').length - 1])[0];
+    file["type/extension"] = file.split('.')[file.split('.').length - 1];
+    console.log(file);
+  }
+  return file;
 }
 
 
 // Posts Area
-
+var post = {};
 var posts = express();
 posts.use(bodyParser.urlencoded({
   extended: true
@@ -266,7 +287,7 @@ posts.get('/:id', function(req, res) {
 
 fs.readdir('./posts/', check);
 
-function check(err, files) {
+async function check(err, files) {
   // TODO: check for any file uploaded, if yes edit the registry and vice versa.
   // console.log(files);
   var post = {};
@@ -274,16 +295,23 @@ function check(err, files) {
     date = extract(files[i], 'date');
     time = extract(files[i], 'time');
     name = extract(files[i], 'name');
-    summary = extract(files[i], 'summary');
-    post[date] = {
-      [time]: {
-        name,
-        summary
-      }
+    id = i;
+    hash = extract(files[i], 'id');
+    summary = await sumIt(files[i]);
+    post[id] = {
+      hash,
+      date,
+      time,
+      name,
+      summary
     };
   }
-  console.log(post);
+  fs.writeFile('./registry/posts.json', JSON.stringify(post), (err) => {
+    if (err) console.error(err);
+  });
 }
+
+
 
 function extract(string, type) {
   switch (type) {
@@ -296,12 +324,46 @@ function extract(string, type) {
     case 'name':
       return string.split('~')[2].split('_').join(' ').split('.md').join('.');
       break;
-    case 'summary':
-      // return (string) => {
-      //
-      // };
+    case 'id':
+      return string.split("").reduce((a, b) => {
+        a = ((a >> 5) + a) + b.charCodeAt(0);
+        return a & a
+      }, 0);
       break;
   }
+}
+
+async function sumIt(string) {
+  // read the file
+  const path = './posts/' + string;
+  let promise = new Promise(function(resolve, reject) {
+    fs.readFile(path, 'utf8', (err, data) => {
+      if (err) {
+        console.error(err);
+      }
+      // convert to html
+      var html = converter.makeHtml(data);
+      // load it in cheerio
+      const $ = cheerio.load(html);
+      // find first p tag.
+      var string = $('p').first().text();
+      if (string.split('').length > 190) {
+        var str = '';
+        var array = string.split('');
+        for (i = 0; i < 190; i++) {
+          str += array[i];
+        };
+        str += '...';
+        str = str.toString();
+        str.split('\n').join(' ');
+        resolve(str);
+      } else {
+        resolve(string);
+      }
+      // return.
+    })
+  });
+  return await promise;
 }
 
 function insertHTML(html) {
@@ -405,7 +467,7 @@ function insertHTML(html) {
         </div>
       </nav>
     </header>
-        <div style="margin: 0% 0%;width: 70%;padding: 1%;">` + html + `
+        <div id="post" style="margin: 0% 0%;width: 65%;padding: 1%;">` + html + `
         </div>
       </body>
     </html>`;

@@ -1,11 +1,1 @@
-{
-  "22/07/2018": {
-    "09:56:55": {
-      "title": "AMDefine",
-      "summary": "A module that can be used to implement AMD's define() in Node. This allows you
-      to code to the AMD API and have the module work in node programs without
-      requiring those other programs to use AMD.
-      "
-    }
-  }
-}
+{"0":{"hash":9049,"date":"22/07/2018","time":"21:25:00","name":"Align the text in a string.","summary":"Align the text in a string."},"1":{"hash":3768,"date":"23/07/2018","time":"21:27:00","name":"amdefine.","summary":"A module that can be used to implement AMD's define() in Node. This allows you\nto code to the AMD API and have the module work in node programs without\nrequiring those other programs to use ..."},"2":{"hash":11956,"date":"24/07/2018","time":"05:59:00","name":"Center-align the text in a string.","summary":"Center-align the text in a string."}}
