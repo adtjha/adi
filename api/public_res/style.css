@@ -177,7 +177,9 @@ nav, section {
 }
 
 .nav > li:hover {
-  background: #333;
+  background: rgba(30, 30, 30, 1);
+  border-radius: 15px;
+  border-top-right-radius: 5px;
 }
 
 

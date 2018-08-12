@@ -205,9 +205,8 @@ api.get('/public/face.jpg', function(req, res) {
 })
 
 api.get('/public/posts.json', function(req, res) {
-  console.log('getting posts');
   res.sendFile('posts.json', {
-    root: 'api/public_res'
+    root: 'registry'
   });
 })
 
@@ -250,7 +249,6 @@ function update(err, folders) {
     var files = fs.readdirSync(path);
     for (var i = 0; i < files.length; i++) {
       var file = {};
-      console.log("current..." + files[i]);
       path = path + "/" + files[i];
       file["size"] = fs.statSync(path).size;
       file["name"] = files[i].split(files[i].split('.')[files[i].split('.').length - 1])[0];
@@ -274,43 +272,41 @@ posts.use(bodyParser.urlencoded({
 }));
 app.use('/posts', posts);
 
-posts.get('/', function(req, res) {
-  res.send('<h1>Hell Yeah !</h1>')
-})
-
 posts.get('/:id', function(req, res) {
   var id = req.params.id;
-  fs.readdir('./posts/', (err, files) => {
-    var path = './posts/' + files[id];
-    fs.readFile(path, 'utf8', (err, data) => {
-      if (err) throw err;
-      // console.log(data);
-      res.send(insertHTML(converter.makeHtml(data)));
-    });
-  });
+  console.log(id);
+  var file;
+  var posts = JSON.parse(fs.readFileSync('./registry/posts.json', 'utf8'));
+  for (var i = 0; i < posts.length; i++) {
+    if (posts[i].hash == id) {
+      file = posts[i].filename;
+    }
+  }
+  res.send(insertHTML(converter.makeHtml(fs.readFileSync('./posts/' + file, 'utf8'))));
 });
-
 
 fs.readdir('./posts/', check);
 
 async function check(err, files) {
   // TODO: check for any file uploaded, if yes edit the registry and vice versa.
   // console.log(files);
-  var post = {};
+  var post = [];
   for (var i = 0; i < files.length; i++) {
+    filename = files[i];
     date = extract(files[i], 'date');
     time = extract(files[i], 'time');
-    name = extract(files[i], 'name');
+    title = extract(files[i], 'title');
     id = i;
     hash = extract(files[i], 'id');
     summary = await sumIt(files[i]);
-    post[id] = {
+    post.push({
       hash,
+      filename,
       date,
       time,
-      name,
+      title,
       summary
-    };
+    });
   }
   fs.writeFile('./registry/posts.json', JSON.stringify(post), (err) => {
     if (err) console.error(err);
@@ -328,7 +324,7 @@ function extract(string, type) {
     case 'time':
       return string.split('~')[1].split('_').join(':');
       break;
-    case 'name':
+    case 'title':
       return string.split('~')[2].split('_').join(' ').split('.md').join('.');
       break;
     case 'id':
@@ -474,7 +470,7 @@ function insertHTML(html) {
         </div>
       </nav>
     </header>
-        <div id="post" style="margin: 0% 0%;width: 65%;padding: 1%;">` + html + `
+        <div id="post" style="margin: auto;width: 60%;padding: 1%;margin-left: 3%;background: #ffffff;box-shadow: 0 0 25px 15px #fff;">` + html + `
         </div>
       </body>
     </html>`;
