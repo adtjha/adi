@@ -145,7 +145,10 @@ admin.post('/create/upload', function(req, res) {
       // console.log(assest);
       setTimeout(() => {
         fs.readdir('./assests/', update);
-      }, '2000')
+      }, '500');
+      setTimeout(() => {
+        fs.readdir('./posts/', check);
+      }, '500');
     }
     res.redirect('/admin/create/upload');
   });
@@ -223,15 +226,32 @@ projects.get('/', function(req, res) {
   res.sendFile('index.html');
 })
 
-
 function address(address, name, mimetype) {
   type = mimetype.match(/(text|image|audio|video|application)/g);
-  if (type) {
-    address = address + type + '/' + name;
-    console.log(address);
-    return address;
-  } else {
-    return 'MimeType Not Supported';
+  var ext = name.slice(name.lastIndexOf('.') + 1, name.length);
+  if (ext == 'md') {
+    function date(name) {
+      var date = new Date();
+      day = date.getDay().toString(),
+        month = date.getMonth().toString(),
+        year = date.getFullYear().toString(),
+        hour = date.getHours().toString(),
+        minute = date.getMinutes().toString(),
+        seconds = date.getSeconds().toString(),
+        milliseconds = date.getMilliseconds().toString(),
+        name = name;
+      return (day + '_' + month + '_' + year + '~' + hour + '_' + minute + '_' + seconds + '_' + milliseconds + '~' + name);
+    }
+    return 'F:/github/adi/posts/' + date(name);
+  }
+  if (ext != 'md') {
+    if (type) {
+      address = address + type + '/' + name;
+      console.log(address);
+      return address;
+    } else {
+      return 'MimeType Not Supported';
+    }
   }
 }
 
