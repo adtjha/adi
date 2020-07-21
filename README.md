@@ -13,6 +13,6 @@ This repository is used for my personal portfolio website. It is a content manag
 
 ---
 
-![WebPage Look](F:\github\adi\assests\image\Look.png)
+![WebPage Look](..\assests\image\Look.png)
 
 
