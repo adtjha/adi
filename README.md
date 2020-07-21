@@ -1,4 +1,4 @@
-# adi[PROJECT ABANDONED]
+# adi [PROJECT ABANDONED]
 This repository is used for my personal portfolio website. It is a content management system, coded from the ground up.
 ## About the Website
 - It's a content managment system made with raw javascript on the front end part.
@@ -6,5 +6,13 @@ This repository is used for my personal portfolio website. It is a content manag
   - manage your uploads also.
   - manage your assests(i.e., pictures, videos, music).  
 - [TO BE MADE] Project Management System. 
+
+
+
+### Here's how it looks, and Yes it works.
+
+---
+
+![WebPage Look](F:\github\adi\assests\image\Look.png)
 
 
