@@ -172,6 +172,28 @@ abbr {
 	border-bottom: 1px black dotted;
 	cursor: help;
 }
+pre{
+	background: #eee;
+  border: 0 solid #ff504e;
+  color: #333;
+  margin-top: 0;
+  margin-bottom: 20px;
+  padding: 15px;
+  position: relative;
+  font-weight: 400;
+  line-height: 1.5;
+  overflow: auto;
+  direction: ltr!important;
+  text-align: left!important;
+  border-left-width: 5px!important;
+  border-right-width: 0!important;
+  -moz-tab-size: 4;
+  tab-size: 4;
+  -moz-hyphens: none;
+  -webkit-hyphens: none;
+  -ms-hyphens: none;
+  hyphens: none;
+}
 pre,
 code {
 	font-family: Menlo, Monaco, "Courier New", monospace;

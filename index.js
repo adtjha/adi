@@ -4,6 +4,8 @@ const fileUpload = require('express-fileupload');
 const fs = require('fs');
 var showdown = require('showdown'),
   converter = new showdown.Converter();
+const cheerio = require('cheerio');
+
 
 const app = express();
 
@@ -19,194 +21,22 @@ app.get('/', function(req, res) {
 //      / \
 // ****/  \\*********||   \\******************  ******
 // ***/    \\********||    \\*********************  ***
-// **/ *****\\*******||     ||***********************  *
-// */  ******\\******||    //*********************  ***
+// **/******\\*******||     ||***********************  *
+// */********\\******||    //*********************  ***
 // /          \\*****||   //******************  *****
 // Admin Settings.
-
-var admin = express();
-admin.use(bodyParser.urlencoded({
-  extended: true
-}));
+var admin = require('./admin/admin');
+// Admin Routing.;
 app.use('/admin', admin);
-admin.set('view engine', 'pug');
-admin.set('views', 'admin/views');
-admin.login = false;
-var route = {},
-  admin_route;
-admin.use('/res', express.static('admin/res'));
-admin.use(fileUpload());
-fs.readFile('./admin/admin_route.json', function(err, data) {
-  if (err) {
-    console.log(err);
-  }
-  // console.log(JSON.parse(data));
-  route = JSON.parse(data);
-});
 
-// Admin Routing.
-
-admin.get('/', function(req, res) {
-  console.log('Get Request ' + admin.login);
-  if (!admin.login) {
-    res.sendFile('login.html', {
-      root: 'admin'
-    });
-  } else {
-    res.sendFile('index.html', {
-      root: 'admin'
-    });
-  }
-});
-
-admin.get('/logout', function(req, res) {
-  if (admin.login) {
-    res.sendFile('login.html', {
-      root: 'admin'
-    });
-    admin.login = false;
-  } else {
-    res.sendFile('login.html', {
-      root: 'admin'
-    });
-    admin.login = false;
-  }
-})
-
-admin.post('/', function(req, res) {
-  console.log('Post Request ' + admin.login);
-  console.log(req.body.pwd.toString());
-  if (req.body.pwd.toString() === '9548' && !admin.login) {
-    res.sendFile('index.html', {
-      root: 'admin'
-    });
-    admin.login = true;
-    console.log(admin.login);
-  }
-  // next();
-});
-
-admin.get('/create', function(req, res) {
-  res.render('menu', {
-    pages: route.pages.create.children,
-    selected: 'create'
-  });
-});
-
-
-
-admin.get('/read', function(req, res) {
-  res.render('menu', {
-    pages: route.pages.read.children,
-    selected: 'read'
-  });
-});
-
-admin.get('/update', function(req, res) {
-  res.render('menu', {
-    pages: route.pages.update.children,
-    selected: 'update'
-  });
-});
-
-admin.get('/delete', function(req, res) {
-  res.render('menu', {
-    pages: route.pages.delete.children,
-    selected: 'delete'
-  });
-});
-
-admin.get('/create/upload', function(req, res) {
-  res.render('upload', {
-    value: 'Text ? Media - File Upload.'
-  });
-})
-
-admin.post('/create/upload', function(req, res) {
-  if (!req.files)
-    return res.status(400).send('No files were uploaded.');
-
-  let file = req.files.File;
-  let add = address('F:/calc/adi/assests/', file.name, file.mimetype);
-
-  let assest = {};
-  assest.name = file.name;
-  assest.type = file.mimetype;
-  assest.address = add;
-
-  // Using the mv() method to place the file somewhere on your server
-  file.mv(add, function(err) {
-    if (err)
-      return res.status(500).send(err);
-    else {
-      // console.log(assest);
-    }
-    res.redirect('/admin/create/upload');
-  });
-})
 
 // API Routing.
-
-var api = express();
-api.use(bodyParser.urlencoded({
-  extended: true
-}));
+var api = require('./api/api');
 app.use('/api', api);
-api.use('/res', express.static('api'));
 
-api.get('/admin/style.css', function(req, res) {
-  res.sendFile('style.css', {
-    root: 'api/admin_res'
-  });
-})
 
-api.get('/admin/app.js', function(req, res) {
-  res.sendFile('app.js', {
-    root: 'api/admin_res'
-  });
-})
-
-api.get('/admin/upload.js', function(req, res) {
-  res.sendFile('upload.js', {
-    root: 'api/admin_res'
-  });
-})
-
-// Public Resources API
-
-api.get('/public/style.css', function(req, res) {
-  res.sendFile('style.css', {
-    root: 'api/public_res'
-  });
-})
-
-api.get('/public/md.css', function(req, res) {
-  res.sendFile('md.css', {
-    root: 'api/public_res'
-  });
-})
-
-api.get('/public/app.js', function(req, res) {
-  res.sendFile('app.js', {
-    root: 'api/admin_res'
-  });
-})
-
-api.get('/public/face.jpg', function(req, res) {
-  res.sendFile('face.jpg', {
-    root: 'api/public_res'
-  });
-})
-
-api.get('/public/posts.json', function(req, res) {
-  console.log('getting posts');
-  res.sendFile('posts.json', {
-    root: 'api/public_res'
-  });
-})
 
 // Project's Area
-
 var projects = express();
 projects.use(bodyParser.urlencoded({
   extended: true
@@ -218,72 +48,115 @@ projects.get('/', function(req, res) {
   res.sendFile('index.html');
 })
 
-
 function address(address, name, mimetype) {
   type = mimetype.match(/(text|image|audio|video|application)/g);
-  if (type) {
-    address = address + type + '/' + name;
-    console.log(address);
-    return address;
-  } else {
-    return 'MimeType Not Supported';
+  var ext = name.slice(name.lastIndexOf('.') + 1, name.length);
+  if (ext == 'md') {
+    function date(name) {
+      var date = new Date();
+      day = date.getDay().toString(),
+        month = date.getMonth().toString(),
+        year = date.getFullYear().toString(),
+        hour = date.getHours().toString(),
+        minute = date.getMinutes().toString(),
+        seconds = date.getSeconds().toString(),
+        milliseconds = date.getMilliseconds().toString(),
+        name = name;
+      return (day + '_' + month + '_' + year + '~' + hour + '_' + minute + '_' + seconds + '_' + milliseconds + '~' + name);
+    }
+    return 'F:/github/adi/posts/' + date(name);
+  }
+  if (ext != 'md') {
+    if (type) {
+      address = address + type + '/' + name;
+      console.log(address);
+      return address;
+    } else {
+      return 'MimeType Not Supported';
+    }
   }
 }
 
 
 // Asset Manager
+
+var assests = {};
 fs.readdir('./assests/', update);
+var asset = {};
 
-function update(err, files) {
-  // console.log(files);
+function update(err, folders) {
+  for (var j = 0; j < folders.length; j++) {
+    path = './assests/' + folders[j];
+    asset[folders[j]] = [];
+    var files = fs.readdirSync(path);
+    for (var i = 0; i < files.length; i++) {
+      var file = {};
+      path = path + "/" + files[i];
+      file["size"] = fs.statSync(path).size;
+      file["name"] = files[i].split(files[i].split('.')[files[i].split('.').length - 1])[0];
+      file["type/extension"] = files[i].split('.')[files[i].split('.').length - 1];
+      asset[folders[j]].push(file);
+      path = path.split('/' + files[i])[0];
+    }
+  }
+  fs.writeFile('./registry/assests.json', JSON.stringify(asset), (err) => {
+    if (err) console.error(err);
+    console.log("Assets file Updated.");
+  });
 }
-
 
 // Posts Area
 
+var post = {};
 var posts = express();
 posts.use(bodyParser.urlencoded({
   extended: true
 }));
 app.use('/posts', posts);
 
-posts.get('/', function(req, res) {
-  res.send('<h1>Hell Yeah !</h1>')
-})
-
 posts.get('/:id', function(req, res) {
   var id = req.params.id;
-  fs.readdir('./posts/', (err, files) => {
-    var path = './posts/' + files[id];
-    fs.readFile(path, 'utf8', (err, data) => {
-      if (err) throw err;
-      // console.log(data);
-      res.send(insertHTML(converter.makeHtml(data)));
-    });
-  });
+  console.log(id);
+  var file;
+  var posts = JSON.parse(fs.readFileSync('./registry/posts.json', 'utf8'));
+  for (var i = 0; i < posts.length; i++) {
+    if (posts[i].hash == id) {
+      file = posts[i].filename;
+    }
+  }
+  res.send(insertHTML(converter.makeHtml(fs.readFileSync('./posts/' + file, 'utf8'))));
 });
-
 
 fs.readdir('./posts/', check);
 
-function check(err, files) {
+async function check(err, files) {
   // TODO: check for any file uploaded, if yes edit the registry and vice versa.
   // console.log(files);
-  var post = {};
+  var post = [];
   for (var i = 0; i < files.length; i++) {
+    filename = files[i];
     date = extract(files[i], 'date');
     time = extract(files[i], 'time');
-    name = extract(files[i], 'name');
-    summary = extract(files[i], 'summary');
-    post[date] = {
-      [time]: {
-        name,
-        summary
-      }
-    };
+    title = extract(files[i], 'title');
+    id = i;
+    hash = extract(files[i], 'id');
+    summary = await sumIt(files[i]);
+    post.push({
+      hash,
+      filename,
+      date,
+      time,
+      title,
+      summary
+    });
   }
-  console.log(post);
+  fs.writeFile('./registry/posts.json', JSON.stringify(post), (err) => {
+    if (err) console.error(err);
+    console.log("Posts JSON File updated.");
+  });
 }
+
+
 
 function extract(string, type) {
   switch (type) {
@@ -293,15 +166,49 @@ function extract(string, type) {
     case 'time':
       return string.split('~')[1].split('_').join(':');
       break;
-    case 'name':
+    case 'title':
       return string.split('~')[2].split('_').join(' ').split('.md').join('.');
       break;
-    case 'summary':
-      // return (string) => {
-      //
-      // };
+    case 'id':
+      return string.split("").reduce((a, b) => {
+        a = ((a >> 5) + a) + b.charCodeAt(0);
+        return a & a
+      }, 0);
       break;
   }
+}
+
+async function sumIt(string) {
+  // read the file
+  const path = './posts/' + string;
+  let promise = new Promise(function(resolve, reject) {
+    fs.readFile(path, 'utf8', (err, data) => {
+      if (err) {
+        console.error(err);
+      }
+      // convert to html
+      var html = converter.makeHtml(data);
+      // load it in cheerio
+      const $ = cheerio.load(html);
+      // find first p tag.
+      var string = $('p').first().text();
+      if (string.split('').length > 190) {
+        var str = '';
+        var array = string.split('');
+        for (i = 0; i < 190; i++) {
+          str += array[i];
+        };
+        str += '...';
+        str = str.toString();
+        str.split('\n').join(' ');
+        resolve(str);
+      } else {
+        resolve(string);
+      }
+      // return.
+    })
+  });
+  return await promise;
 }
 
 function insertHTML(html) {
@@ -405,7 +312,7 @@ function insertHTML(html) {
         </div>
       </nav>
     </header>
-        <div style="margin: 0% 0%;width: 70%;padding: 1%;">` + html + `
+        <div id="post" style="margin: auto;width: 60%;padding: 1%;margin-left: 3%;background: #ffffff;box-shadow: 0 0 25px 15px #fff;">` + html + `
         </div>
       </body>
     </html>`;
